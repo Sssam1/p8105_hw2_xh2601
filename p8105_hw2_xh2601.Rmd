@@ -5,3 +5,38 @@ date: "2025-09-29"
 output: github_document
 ---
 
+```{r setup, message = FALSE}
+# load the tidyverse library
+library(tidyverse)
+```
+
+## Problem 1
+
+#### Step One. Clean the data in pols-month.csv
+1. Use separate() to break up the variable mon into integer variables year, month, and day
+
+```{r}
+# create a dataframe named "pols" for pols-month.csv data
+# use 'clean_names()' to clean variable names
+# use 'separate()' to break "mon" variable into "year", "month", "day" variables, separated by "-"
+# use 'mutate()' to convert character variables into integer variables
+pols = 
+  read_csv("fivethirtyeight_datasets/pols-month.csv") |> 
+  janitor::clean_names() |> 
+  separate(mon, into = c("year", "month", "day"), sep = "-") |> 
+  mutate(
+    year = as.integer(year),
+    month = as.integer(month),
+    day = as.integer(day)
+  )
+```
+
+2. Replace month number with month name
+
+3. Create a president variable taking values gop and dem, and remove prez_dem and prez_gop
+
+4. Remove the day variable.
+
+
+
+
