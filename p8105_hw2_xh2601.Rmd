@@ -123,3 +123,41 @@ snp =
   select(year, month, everything())
 ```
 
+#### Step Three. Tidy the unemployment data
+
+```{r}
+# create a dataframe named "unemployment" for unemployment.csv data
+# use 'clean_names()' to clean variable names
+# use 'pivot_longer()' to convert wide to long format
+# use 'mutate()' to convert character variable into integer variable in "year"
+# use 'mutate()' to replace abbreviated month with month name in "month"
+unemployment = 
+  read_csv("fivethirtyeight_datasets/unemployment.csv") |> 
+  janitor::clean_names() |> 
+  pivot_longer(
+    cols = jan:dec,
+    names_to = "month",
+    values_to = "unemployment_percentage"
+  ) |> 
+  mutate(
+    year = as.integer(year)
+  ) |> 
+  mutate(
+    month = case_match(
+      month,
+      "jan" ~ "January",
+      "feb" ~ "February",
+      "mar" ~ "March",
+      "apr" ~ "April",
+      "may" ~ "May",
+      "jun" ~ "June",
+      "jul" ~ "July",
+      "aug" ~ "August",
+      "sep" ~ "September",
+      "oct" ~ "October",
+      "nov" ~ "November",
+      "dec" ~ "December"
+    )
+  )
+```
+
