@@ -161,3 +161,42 @@ unemployment =
   )
 ```
 
+#### Step Four. Join the datasets and interpret
+
+```{r}
+# use 'left_join()' to merge snp into pols
+# use 'left_join()' to merge unemployment into the previous result
+pol_econ_df = 
+  left_join(pols, snp, by = c("year", "month")) |> 
+  left_join(unemployment, by = c("year", "month"))
+```
+
+**Interpretation:**
+
+*pols*: contains 822 observations of 9 variables related to the number of politicians who are democratic or republican at a given time. 
+
+- "year" and "month" record the year and month of the count; 
+- "president" indicate whether the president was republican or democratic on the associated year and month (gop = republican, dem = democratic); 
+- "gov_gop", "sen_gop", and "rep_gop" record the number of republican governors, senators, and representatives, respectively, on the associated year and month;
+- "gov_dem", "sen_dem", and "rep_dem" record the number of democratic governors, senators, and representatives, respectively, on the associated year and month.
+
+*snp*: contains 787 observations of 3 variables related to Standard & Poor’s stock market index (S&P), often used as a representative measure of stock market as a whole, at a given time.
+
+- "year" and "month" record the year and month of the observation;
+- "close" records the closing values of the S&P stock index on the associated year and month.
+
+*unemployment*: contains 816 observations of 3 variables related to the percentage of unemployment at a given time.
+
+- "year" and "month" record the year and month of the measurement;
+- "unemployment_percentage" records the percentage of unemployment on the associated year and month.
+
+*pol_econ_df*: contains 822 observations of 11 variables combining variables from *pols*, *snp*, and *unemployment* datasets.
+
+- dimension: 822 rows, 11 columns.
+- range of years: from January 1947 to June 2015. This range is determined by the *pols* dataset, while variables from *snp* and *unemployment* are included only for months and years where their data overlap with this time period.
+- names of key variables: 
+  - "year" and "month" record the year and month of the observation, which are form the common time index across all three datasets.
+  - Each observation could include the party of the president, the number of Democratic and Republican politicians, S&P index, and unemployment rate, provided that valid data are available from the three source datasets for that year and month.
+- *pol_econ_df* is a monthly dataset spanning January 1947 to June 2015, containing political and economic related data. It allows us to learn the relations between political power (specifically, the party holding presidency and party composition of politicians) and economic indicators including stock market performance (S&P index) and the unemployment rate.
+
+
