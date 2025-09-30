@@ -6,8 +6,9 @@ output: github_document
 ---
 
 ```{r setup, message = FALSE}
-# load the tidyverse library
+# load the tidyverse and readxl library
 library(tidyverse)
+library(readxl)
 ```
 
 ## Problem 1
@@ -21,7 +22,7 @@ library(tidyverse)
 # use 'separate()' to break "mon" variable into "year", "month", "day" variables, separated by "-"
 # use 'mutate()' to convert character variables into integer variables
 pols = 
-  read_csv("fivethirtyeight_datasets/pols-month.csv") |> 
+  read_csv("data/fivethirtyeight_datasets/pols-month.csv") |> 
   janitor::clean_names() |> 
   separate(mon, into = c("year", "month", "day"), sep = "-") |> 
   mutate(
@@ -91,7 +92,7 @@ pols = select(pols, -day)
 # use 'select()' to remove "day"
 # use 'select()' to reorder the dataframe, so that "year" and "month" are the leading cols
 snp = 
-  read_csv("fivethirtyeight_datasets/snp.csv") |> 
+  read_csv("data/fivethirtyeight_datasets/snp.csv") |> 
   janitor::clean_names() |> 
   separate(date, into = c("month", "day", "year"), sep = "/") |> 
   mutate(
@@ -132,7 +133,7 @@ snp =
 # use 'mutate()' to convert character variable into integer variable in "year"
 # use 'mutate()' to replace abbreviated month with month name in "month"
 unemployment = 
-  read_csv("fivethirtyeight_datasets/unemployment.csv") |> 
+  read_csv("data/fivethirtyeight_datasets/unemployment.csv") |> 
   janitor::clean_names() |> 
   pivot_longer(
     cols = jan:dec,
@@ -198,5 +199,67 @@ pol_econ_df =
   - "year" and "month" record the year and month of the observation, which are form the common time index across all three datasets.
   - Each observation could include the party of the president, the number of Democratic and Republican politicians, S&P index, and unemployment rate, provided that valid data are available from the three source datasets for that year and month.
 - *pol_econ_df* is a monthly dataset spanning January 1947 to June 2015, containing political and economic related data. It allows us to learn the relations between political power (specifically, the party holding presidency and party composition of politicians) and economic indicators including stock market performance (S&P index) and the unemployment rate.
+
+## Problem 2
+
+#### Step One. Clean the Mr. Trash Wheel sheet
+
+```{r}
+# use 'read_excel()' to read the file
+# use 'sheet' to specify the sheet 
+# use 'skip' to omit non-data entries - top row
+# use 'range' to omit non-data entries - columns after the 14th column
+# use 'clean_names()' to clean variable names
+# use 'rename()' to rename weight and volume variable names for clarity
+# use 'drop_na()' to omit rows that do not include dumpster-specific data
+# use 'mutate()' to round the number of sports balls to the nearest integer
+# use 'mutate()' to convert the previous result to an integer
+mr_tw_df = 
+  read_excel(
+    "data/202409 Trash Wheel Collection Data.xlsx", 
+    sheet = "Mr. Trash Wheel",
+    skip = 1,
+    range = cell_cols(1:14)) |> 
+  janitor::clean_names() |> 
+  rename(weight = weight_tons, volume = volume_cubic_yards) |> 
+  drop_na(dumpster) |> 
+  mutate(sports_balls = round(sports_balls)) |> 
+  mutate(sports_balls = as.integer(sports_balls))
+```
+
+#### Step Two. Clean the Professor Trash Wheel sheet
+
+```{r}
+prof_tw_df = 
+  read_excel(
+    "data/202409 Trash Wheel Collection Data.xlsx", 
+    sheet = "Professor Trash Wheel",
+    skip = 1,
+    range = cell_cols(1:13)) |> 
+  janitor::clean_names() |> 
+  rename(weight = weight_tons, volume = volume_cubic_yards) |> 
+  drop_na(dumpster) 
+```
+
+#### Step Three. Clean the Gwynnda Trash Wheel sheet
+
+```{r}
+gwyn_tw_df = 
+  read_excel(
+    "data/202409 Trash Wheel Collection Data.xlsx", 
+    sheet = "Gwynnda Trash Wheel",
+    skip = 1,
+    range = cell_cols(1:12)) |> 
+  janitor::clean_names() |> 
+  rename(weight = weight_tons, volume = volume_cubic_yards) |> 
+  drop_na(dumpster) 
+```
+
+
+
+
+
+
+
 
 
