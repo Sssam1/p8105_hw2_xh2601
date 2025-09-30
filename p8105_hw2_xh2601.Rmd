@@ -79,4 +79,47 @@ pols = pols |>
 pols = select(pols, -day)
 ```
 
+#### Step Two. Clean the data in snp.csv
+
+```{r}
+# create a dataframe named "snp" for snp.csv data
+# use 'clean_names()' to clean variable names
+# use 'separate()' to break "date" variable into "year", "month", "day" variables, separated by "/"
+# use 'mutate()' to convert character variables into integer variables
+# use 'mutate()' to replace month number with month name in "month"
+# use 'mutate()' to replace year number with the full year
+# use 'select()' to remove "day"
+# use 'select()' to reorder the dataframe, so that "year" and "month" are the leading cols
+snp = 
+  read_csv("fivethirtyeight_datasets/snp.csv") |> 
+  janitor::clean_names() |> 
+  separate(date, into = c("month", "day", "year"), sep = "/") |> 
+  mutate(
+    year = as.integer(year),
+    month = as.integer(month),
+    day = as.integer(day)
+  ) |> 
+  mutate(
+    month = case_match(
+      month,
+      1 ~ "January",
+      2 ~ "February",
+      3 ~ "March",
+      4 ~ "April",
+      5 ~ "May",
+      6 ~ "June",
+      7 ~ "July",
+      8 ~ "August",
+      9 ~ "September",
+      10 ~ "October",
+      11 ~ "November",
+      12 ~ "December"
+    )
+  ) |> 
+  mutate(
+    year = if_else(year < 25, year + 2000, year + 1900)
+  ) |> 
+  select(-day) |> 
+  select(year, month, everything())
+```
 
