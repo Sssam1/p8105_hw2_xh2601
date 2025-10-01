@@ -244,7 +244,7 @@ prof_tw_df =
   mutate(trash_wheel_type = "professor_trash_wheel")
 ```
 
-#### Step Three. Clean the Gwynnda Trash Wheel sheet
+#### Step Three. Clean the Gwynns Falls Trash Wheel sheet
 
 ```{r}
 gwyn_tw_df = 
@@ -273,7 +273,7 @@ combined_tw_df =
 
 ```{r}
 # total weight of trash collected by Professor Trash Wheel
-wt_prof_tw = sum(mr_tw_df[["weight_tons"]], na.rm = TRUE)
+wt_prof_tw = sum(prof_tw_df[["weight_tons"]], na.rm = TRUE)
   
 # total number of cigarette butts collected by Gwynnda in June of 2022
 cig_2206_gwyn_tw = gwyn_tw_df |> 
