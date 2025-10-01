@@ -406,31 +406,83 @@ zori_df = zori_df |>
 
 ```{r}
 # create a dataframe named "zori_w_zip_df" for the combined data
-# use 'left_join()' to merge zori data into the zip code data
-# use 'select()' to reorder the dataframe, so that it has the order of: date -> metro area -> state info -> city info -> county info -> zip code & region info -> zori by date
-# use 'mutate()' to fill in the incomplete metro, state_name, and city_name data
+# use 'left_join()' to merge zip code data into the zori data
+# use 'select()' to remove some variables from zip_code_df: zip_code_date (not helpful in the combined dataset), state_fips, county_code (included in county_fips)
+# use 'select()' to reorder the dataframe, so that it has the order of: date -> metro area -> state info -> city info -> county info -> neighborhood -> zip code & region info -> zori 
 zori_w_zip_df = 
-  left_join(zip_code_df, zori_df, by = "zip_code") |> 
-  select(zip_code_date, metro, state_name, state_fips, city_name, county_name_zipcode, county_name_zori, county_code, county_fips, region_id, zip_code, neighborhood, size_rank, everything()) |> 
-  mutate(metro = "New York-Newark-Jersey City, NY-NJ-PA",
-         state_name = "NY",
-         city_name = "New York") 
-  
+  left_join(zori_df, zip_code_df, by = "zip_code") |> 
+  select(-zip_code_date, -state_fips, -county_code) |> 
+  select(year, month, metro, state_name, city_name, county_name_zori, county_name_zipcode, county_fips, neighborhood, zip_code, everything())
 
-### next, check for inconsistency between county_name_zipcode and county_name_zori
+# check for inconsistency between county_name_zipcode and county_name_zori
+inconsistent_county = zori_w_zip_df |> 
+  filter(county_name_zipcode != county_name_zori)
+
+# use 'select()' to remove county_name_zipcode
+# rename county_name_zori to county_name
+zori_w_zip_df = zori_w_zip_df |> 
+  select(-county_name_zipcode) |> 
+  rename(county_name = county_name_zori)
+```
+
+We have found that for zip code 11693, county name on zori and zip code datasets are different. After checking, 11693 should be in Queens county, not Kings county, so we keep the county name in county_name_zori, and remove the column county_name_zipcode to avoid incorrect information and confusion.
+
+```{r}
+# check for ZIP codes in zip_code_df but not in zori_df
+zori_missing_zip = zip_code_df |> 
+  anti_join(zori_df, by = "zip_code")
+
+# only keep zip_code, zori, county, and neighborhood data, in Jan 2020 and Jan 2021
+# convert to wide format for comparison
+# rename year variables and remove month column
+# compare rental prices in January 2021 to prices in January 2020
+covid_drop = zori_w_zip_df |> 
+  filter(year %in% c(2020, 2021), month == "January") |> 
+  select(year, month, zip_code, zori, county_name, neighborhood) |> 
+  pivot_wider(
+    names_from = year,
+    values_from = zori
+  ) |> 
+  rename("2020_jan_zori" = "2020", "2021_jan_zori" = "2021") |> 
+  select(-month) |> 
+  mutate(zori_drop = `2021_jan_zori` - `2020_jan_zori`)
+
+# average drop from Jan 2020 to 2021
+mean_covid_drop = mean(covid_drop[["zori_drop"]], na.rm = TRUE)
+
+# 10 ZIP codes with largest drop
+# order the covid_drop df
+# name county name to borough name
+largest10_drop <- covid_drop |> 
+  arrange(zori_drop) |> 
+  slice_head(n = 10) |>
+  select(zip_code, county_name, neighborhood, zori_drop) |> 
+  mutate(
+    county_name = case_match(
+    county_name,
+    "New York" ~ "Manhattan",
+    "Kings" ~ "Brooklyn",
+    "Richmond" ~ "Staten Island"
+    )
+  ) |> 
+  rename(borough = county_name)
+# show in a table
+largest10_drop|> 
+  knitr::kable()
 ```
 
 
+**Interpretation:**
 
-Briefly describe the resulting tidy dataset. 
-How many total observations exist? 
-How many unique ZIP codes are included, and how many unique neighborhoods?
+- The resulting tidy dataset contains 17284 observations and 12 columns. Columns include date of observation (year, month), area information (metro, state_name, city_name), county information (county_name, county_fips), region information (neighborhood, zip_code, region_id, size_rank), and ZORI data (zori).
 
-Which ZIP codes appear in the ZIP code dataset but not in the Zillow Rental Price dataset? 
-Using a few illustrative examples discuss why these ZIP codes might be excluded from the Zillow dataset.
+- There are `r length(unique(zori_w_zip_df[["zip_code"]]))` unique ZIP codes and `r length(unique(zori_w_zip_df[["neighborhood"]]))` unique neighborhoods included in the combined dataset.
 
-For all available ZIP codes, compare rental prices in January 2021 to prices in January 2020. 
-Make a table that shows the 10 ZIP codes (along with the borough and neighborhood) with largest drop in price from January 2020 to 2021. 
+- There are 171 ZIP codes that appear in the ZIP code dataset but not in the Zillow Rental Price dataset. For example, 10464 in the Bronx is located in Pelham Bay Park, which is not a residential area and therefore lacks rental price data. Similarly, 10111 in Manhattan corresponds to Rockefeller Center and nearby shopping areas, which are primarily commercial rather than residential. Another example is 11362 in Queens, covering the Little Neck neighborhood near Nassau County, where the rental market is limited and most housing is owner-occupied. In general, the Zillow dataset likely excludes ZIP codes that are not primarily residential, have low population density, or have very few rental listings and low needs.
+
+- The average rental price in New York City dropped from January 2020 to 2021 is `r abs(mean_covid_drop)`. The 10 ZIP codes with the largest drop in rental prices from January 2020 to January 2021 are shown above. All of them are located in Manhattan, with the largest decline of 912.5966 occurring in a ZIP code where the average rent fell from 6334.211 in January 2020 to 5421.614 in January 2021. These ZIP codes are concentrated in mid- to lower Manhattan, covering neighborhoods such as the Lower East Side, Gramercy, Chelsea, Greenwich Village, and Soho.
+
+
 
 
 
