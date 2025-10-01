@@ -210,7 +210,6 @@ pol_econ_df =
 # use 'skip' to omit non-data entries - top row
 # use 'range' to omit non-data entries - columns after the 14th column
 # use 'clean_names()' to clean variable names
-# use 'rename()' to rename weight and volume variable names for clarity
 # use 'drop_na()' to omit rows that do not include dumpster-specific data
 # use 'mutate()' to round the number of sports balls to the nearest integer
 # use 'mutate()' to convert the previous result to an integer
@@ -218,12 +217,11 @@ pol_econ_df =
 # use 'mutate()' to create a variable to keep track of which Trash Wheel is which 
 mr_tw_df = 
   read_excel(
-    "data/202409 Trash Wheel Collection Data.xlsx", 
+    "data/202509 Trash Wheel Collection Data.xlsx", 
     sheet = "Mr. Trash Wheel",
     skip = 1,
     range = cell_cols(1:14)) |> 
   janitor::clean_names() |> 
-  rename(weight = weight_tons, volume = volume_cubic_yards) |> 
   drop_na(dumpster) |> 
   mutate(sports_balls = round(sports_balls)) |> 
   mutate(sports_balls = as.integer(sports_balls)) |> 
@@ -236,12 +234,11 @@ mr_tw_df =
 ```{r}
 prof_tw_df = 
   read_excel(
-    "data/202409 Trash Wheel Collection Data.xlsx", 
+    "data/202509 Trash Wheel Collection Data.xlsx", 
     sheet = "Professor Trash Wheel",
     skip = 1,
     range = cell_cols(1:13)) |> 
   janitor::clean_names() |> 
-  rename(weight = weight_tons, volume = volume_cubic_yards) |> 
   drop_na(dumpster) |> 
   mutate(year = as.integer(year)) |>
   mutate(trash_wheel_type = "professor_trash_wheel")
@@ -252,12 +249,11 @@ prof_tw_df =
 ```{r}
 gwyn_tw_df = 
   read_excel(
-    "data/202409 Trash Wheel Collection Data.xlsx", 
-    sheet = "Gwynnda Trash Wheel",
+    "data/202509 Trash Wheel Collection Data.xlsx", 
+    sheet = "Gwynns Falls Trash Wheel",
     skip = 1,
     range = cell_cols(1:12)) |> 
   janitor::clean_names() |> 
-  rename(weight = weight_tons, volume = volume_cubic_yards) |> 
   drop_na(dumpster) |> 
   mutate(year = as.integer(year)) |>
   mutate(trash_wheel_type = "gwynnda_trash_wheel") 
@@ -277,7 +273,7 @@ combined_tw_df =
 
 ```{r}
 # total weight of trash collected by Professor Trash Wheel
-wt_prof_tw = sum(mr_tw_df[["weight"]], na.rm = TRUE)
+wt_prof_tw = sum(mr_tw_df[["weight_tons"]], na.rm = TRUE)
   
 # total number of cigarette butts collected by Gwynnda in June of 2022
 cig_2206_gwyn_tw = gwyn_tw_df |> 
@@ -288,7 +284,7 @@ cig_2206_gwyn_tw = gwyn_tw_df |>
 
 **Interpretation:**
 
-- There are 1033 observations and 15 columns in the combined dataset (*combined_tw_df*), including 651 observations from the Mr. Trash Wheel dataset (*mr_tw_df*), 119 observations from the Professor Trash Wheel dataset (*prof_tw_df*), and 263 observations from the Gwynnda Trash Wheel dataset (*gwyn_tw_df*).
+- There are 1188 observations and 15 columns in the combined dataset (*combined_tw_df*), including 707 observations from the Mr. Trash Wheel dataset (*mr_tw_df*), 132 observations from the Professor Trash Wheel dataset (*prof_tw_df*), and 349 observations from the Gwynns Falls Trash Wheel dataset (*gwyn_tw_df*).
 
 - *mr_tw_df* contains 15 columns: dumpster ID; year, month, and date of observation; total weight (in tons) and volume (in cubic yards) of trash on the observation date and dumpster id; numbers of plastic bottles, polystyrene, cigarette butts, glass bottles, plastic bags, wrappers, and sports balls on the observation date and dumpster id; estimated number of homes that could have been powered by the collected trash; and the type/name of trash wheel.
 
