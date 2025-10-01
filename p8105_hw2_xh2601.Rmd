@@ -474,7 +474,7 @@ largest10_drop|>
 
 **Interpretation:**
 
-- The resulting tidy dataset contains 17284 observations and 12 columns. Columns include date of observation (year, month), area information (metro, state_name, city_name), county information (county_name, county_fips), region information (neighborhood, zip_code, region_id, size_rank), and ZORI data (zori).
+- The resulting tidy dataset contains 17284 rows and 12 columns. Within this dataset, `r sum(!is.na(zori_w_zip_df[["zori"]]))` rows have available ZORI data. Columns include date of observation (year, month), area information (metro, state_name, city_name), county information (county_name, county_fips), region information (neighborhood, zip_code, region_id, size_rank), and ZORI data (zori).
 
 - There are `r length(unique(zori_w_zip_df[["zip_code"]]))` unique ZIP codes and `r length(unique(zori_w_zip_df[["neighborhood"]]))` unique neighborhoods included in the combined dataset.
 
